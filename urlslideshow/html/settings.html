@@ -1,0 +1,20 @@
+<script type="text/javascript" src="../js/templates.js"></script>
+<script type="text/javascript" src="../js/settings.js"></script>
+<script type="text/javascript" src="../js/templates.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/settings.css" />
+
+<div>
+    <h2>Url Slideshow</h2>
+    <p>Show url's as a slide show</p>
+    <input type="button" id="play" value="Play" />
+    <hr>
+    <p>Url's:</p>
+    <ul class="urls">
+        <li template="url">
+        <input type="text" placeholder="http://fully.qualified.site.domain.com" value="{url}">
+        <input type="number" min="5" placeholder="Enter the timeout for this URL (in seconds). Minimum 15 seconds." value="{sleep}">
+        <input type="button" value="Go to" />
+        </li>
+    </ul>
+    <input type="button" id="add" value="+" /> &nbsp; &nbsp; <input type="button" id="save" value="Save" />
+</div>

@@ -1,0 +1,22 @@
+.urls {
+    padding: 0;
+}
+.urls li {
+    padding: 0 0 5px 0;
+    white-space: nowrap;
+}
+
+input[type=text],
+input[type=number] {
+    padding: 2px 0 2px 5px;
+    border: 1px solid #666;
+    border-radius: 3px;
+}
+
+input[type=text] {
+    width: 500px;
+}
+
+input[type=number] {
+    width: 50px;
+}

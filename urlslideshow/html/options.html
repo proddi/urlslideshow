@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Url Slideshow Options</title>
+    <script type="text/javascript" src="../js/templates.js"></script>
+    <script type="text/javascript" src="../js/options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/options.css" />
+</head>
+
+<body>
+    <div>
+        <p>Default url showing time: <input id="defaultTime" type="number" min="5" placeholder="secs"></p>
+        <p>Url's:</p>
+        <ul class="urls">
+            <li template="url">
+            <input type="text" placeholder="http://fully.qualified.domain/url" value="{url}">
+            <input type="number" min="5" placeholder="default" value="{sleep}">
+            <input type="button" value="Go to" />
+            </li>
+        </ul>
+        <input type="button" id="save" value="Save">  &nbsp; &nbsp; <input type="button" id="add" value="+">
+    </div>
+</body>
+</html>

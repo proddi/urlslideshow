@@ -1,26 +1,39 @@
-var show;
-var slideIndex;
-var slides = JSON.parse(localStorage.getItem('slides') || "[]");
+var icons = {
+        stopped: {
+            "19": "icons/slideshow-24.png",
+            "38": "icons/slideshow-48.png"
+        },
+        running: {
+            "19": "icons/slideshow-running-24.png",
+            "38": "icons/slideshow-running-48.png"
+        },
+    };
 
+// The slide show
+var show = new SlideShow({
+        slides: JSON.parse(localStorage.getItem('slides') || "[]"),
+        defaultSleep: parseInt(localStorage.getItem('defaultSleep')) || 60,
+        onstart: function() {
+            chrome.browserAction.setIcon({ "path": icons.running, });
+        },
+        onstop: function() {
+            chrome.browserAction.setIcon({ "path": icons.stopped, });
+        },
+    });
+
+// Browser-icon click handler
+chrome.browserAction.onClicked.addListener(function() {
+    show.startStop(show);
+});
+
+// Message listener (options i/o)
 chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
     switch(message.type) {
-        case "play":
-            localStorage.setItem('slides', JSON.stringify(message.slides));
-            show && show.stop(); // stop previous show
-            show = startSlideShow();
-            show.start();
-            break;
-
-        case "stop":
-            show && show.stop();
-            show = undefined;
-            break;
-
         case "goto":
             if (show) {
                 var url = message.url;
-                for (var i=0; i<slides.length; i++) {
-                    if (slides[i].url == url) {
+                for (var i=0; i<show.slides.length; i++) {
+                    if (show.slides[i].url == url) {
                         show.goto(i);
                         break;
                     }
@@ -28,67 +41,85 @@ chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
             }
             break;
 
-        case "isPlaying":
-            sendResponse(show && show.running);
-            break;
-
         case "getSlides":
-            sendResponse(slides);
+            sendResponse({ slides: show.slides, defaultSleep: show.defaultSleep, });
             break;
 
         case "putSlides":
-            slides = message.slides;
-            localStorage.setItem('slides', JSON.stringify(slides));
+            show.slides         = message.slides;
+            show.defaultSleep   = message.defaultSleep || 60;
+            localStorage.setItem('slides', JSON.stringify(show.slides));
+            localStorage.setItem('defaultSleep', show.defaultSleep);
             break;
 
         break;
     }
 });
 
+// The slide show
+function SlideShow(options) {
+    this.slides = options.slides || [];
+    this.defaultSleep = options.defaultSleep || 60;
+    this.onstart = options.onstart;
+    this.onstop = options.onstop;
+};
 
-function startSlideShow() {
-    var nextHandle;
-    var showTab;
+SlideShow.prototype.startStop = function startStop() {  // pause/unpause as well
+    if (!this.running) this.start();
+    else this.stop();
+};
 
-    function nextSlidePlease() {
-        self.running = true;
-        var slide = slides[++self.index] || slides[self.index=0];
-        showTab && chrome.tabs.update(showTab.id, {url: slide.url}, function(tab) {
-            showTab = tab;
-            if (!tab) { // tab got closed --> canceling...
-                self.stop();
-            }
-        });
-        var delay = (slide.sleep || 60);
-        nextHandle = setTimeout(nextSlidePlease, 1000*delay);
-        console.log("Show slide", slide, "for " + delay + "seconds...");
-    };
+SlideShow.prototype.start = function start() {
+    if (this.running) return;
+    console.warn(this, "start()");
+    this.running = true;
+    this.nextSlidePlease(true);
+    this.onstart && this.onstart(this);
+};
 
-    var self = {
-        start: function() {
-            chrome.tabs.create({ active: true, }, function(tab) {
-                showTab = tab;
-                console.log("Slideshow tab created...");
+SlideShow.prototype.stop = function stop() {
+    this._scheduledHandle = this._scheduledHandle && clearTimeout(this._scheduledHandle) && undefined;
+    if (!this.running) return;
+    this.running = false;
+    console.warn(this, "stop()");
+    this._tabPromise = this._tabPromise && this._tabPromise.then(function(tab) { chrome.tabs.remove(tab.id); }) && undefined;
+    this.onstop && this.onstop(this);
+};
 
-                nextSlidePlease();
+SlideShow.prototype.nextSlidePlease = function nextSlidePlease(rotate) {
+    var that = this;
+    var slide = this.slides[++self.index] || this.slides[self.index=0];
+
+    // promise to open a tab on demand
+    this._tabPromise = this._tabPromise || new Promise(function(resolve, reject) {
+        chrome.tabs.create({ active: true, }, resolve);
+    });
+
+    // change url
+    this._tabPromise.then(function(tab) {
+        return new Promise(function(resolve, reject) {
+            console.log('Showing slide', slide);
+            chrome.tabs.update(tab.id, {url: slide.url}, function(tab) {
+                if (tab) resolve(tab);
+                else reject();
             });
-        },
-        stop: function() {
-            console.log("Canceling Slideshow...");
-            nextHandle && clearTimeout(nextHandle);
-            self.running = false;
-            showTab && chrome.tabs.remove(showTab.id);
-        },
-        goto: function(index) {
-            if (self.running) {
-                nextHandle && clearTimeout(nextHandle);
-                self.index = index-1;
-                nextSlidePlease();
-            }
-        },
-        index: -1,
-        running: false,
-    };
+        });
+    });
 
-    return self;
+    // if rotate schedule next slide
+    rotate && this._tabPromise.then(function() {
+        var sleep = slide.sleep || that.defaultSleep;
+        that._scheduledHandle = setTimeout(that.nextSlidePlease.bind(that, rotate), sleep * 1000);
+    });
+
+    // stop on error
+    this._tabPromise.catch(this.stop.bind(this));
+};
+
+SlideShow.prototype.goto = function goto(index) {
+    if (this.running) {
+        this._scheduledHandle = this._scheduledHandle && clearTimeout(this._scheduledHandle) && undefined;
+        self.index = index-1;
+        this.nextSlidePlease(true);
+    }
 };

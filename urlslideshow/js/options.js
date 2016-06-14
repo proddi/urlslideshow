@@ -1,31 +1,6 @@
 window.onload = function() {
-//    var button = document.getElementById("button");
-//    var textarea = document.getElementById("urls");
-//    var delay = document.getElementById("delay");
     var slides = JSON.parse(localStorage.getItem('slides') || "[]");
     var URLTemplate = new Template(document.querySelector("[template=url]"));
-/*
-    // register button click
-    button.onclick = function() {
-        var sleep = parseInt(delay.value);
-        var slides = textarea.value.split("\n")
-            .filter(function(line) {
-                    return line;
-                })
-            .map(function(url) {
-                    return { sleep: sleep, url: url, };
-                });
-        chrome.extension.sendMessage({
-            type: "roll-on",
-            slides: slides,
-        });
-        localStorage.setItem('slides', JSON.stringify(slides));
-    }
-
-    textarea.value = JSON.parse(localStorage.getItem('slides') || "[]")
-        .map(function(slide) { return slide.url; })
-        .join("\n");
-*/
 
     var nodes = [];
     var isPlaying;
@@ -33,9 +8,10 @@ window.onload = function() {
     // get the settings
     chrome.extension.sendMessage({
         type: "getSlides",
-    }, function(slides) {
-        console.log("got slides:", slides);
-        slides.forEach(function(slide) {
+    }, function(settings) {
+        console.log("got", settings);
+        document.getElementById("defaultTime").value = settings.defaultSleep;
+        settings.slides.forEach(function(slide) {
             var clone = URLTemplate.clone(slide).append();
             clone.find("input[type=button]").onclick = function() {  // TODO: generic click handlers?
                 chrome.extension.sendMessage({
@@ -46,23 +22,6 @@ window.onload = function() {
             nodes.push(clone);
         });
     });
-
-    // sets the correct state on the play/stop button
-    chrome.extension.sendMessage({
-        type: "isPlaying",
-    }, function(status) {
-        isPlaying = status;
-        document.getElementById("play").value = isPlaying ? "Stop Slideshow" : "Start Slideshow";
-    });
-
-    // start/stop slideshow
-    document.getElementById("play").onclick = function() {
-        var slides = buildSlides(nodes);
-        chrome.extension.sendMessage({
-            type: isPlaying ? "stop" : "play",
-            slides: slides,
-        });
-    };
 
     // adds a url line
     document.getElementById("add").onclick = function() {
@@ -81,6 +40,7 @@ window.onload = function() {
         chrome.extension.sendMessage({
             type: "putSlides",
             slides: buildSlides(nodes),
+            defaultSleep: parseInt(document.getElementById("defaultTime").value),
         });
     };
 

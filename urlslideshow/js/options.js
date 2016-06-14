@@ -11,6 +11,7 @@ window.onload = function() {
     }, function(settings) {
         console.log("got", settings);
         document.getElementById("defaultTime").value = settings.defaultSleep;
+        document.getElementById("autostart").checked = settings.autostart,
         settings.slides.forEach(function(slide) {
             var clone = URLTemplate.clone(slide).append();
             clone.find("input[type=button]").onclick = function() {  // TODO: generic click handlers?
@@ -41,6 +42,7 @@ window.onload = function() {
             type: "putSlides",
             slides: buildSlides(nodes),
             defaultSleep: parseInt(document.getElementById("defaultTime").value),
+            autostart: document.getElementById("autostart").checked,
         });
     };
 

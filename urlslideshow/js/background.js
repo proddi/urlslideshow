@@ -14,6 +14,7 @@ var show = new SlideShow({
         slides: JSON.parse(localStorage.getItem('slides') || "[]"),
         defaultSleep: parseInt(localStorage.getItem('defaultSleep')) || 60,
         autostart: !!localStorage.getItem('autostart'),
+        fullscreen: !!localStorage.getItem('fullscreen'),
         onstart: function() {
             chrome.browserAction.setIcon({ "path": icons.running, });
         },
@@ -47,6 +48,7 @@ chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
                     slides: show.slides,
                     defaultSleep: show.defaultSleep,
                     autostart: show.autostart,
+                    fullscreen: show.fullscreen,
                 });
             break;
 
@@ -54,9 +56,11 @@ chrome.extension.onMessage.addListener(function(message, sender, sendResponse) {
             show.slides         = message.slides;
             show.defaultSleep   = message.defaultSleep || 60;
             show.autostart      = message.autostart;
+            show.fullscreen     = message.fullscreen;
             localStorage.setItem('slides', JSON.stringify(show.slides));
             localStorage.setItem('defaultSleep', show.defaultSleep);
             localStorage.setItem('autostart', show.autostart || "");
+            localStorage.setItem('fullscreen', show.fullscreen || "");
             break;
 
         break;

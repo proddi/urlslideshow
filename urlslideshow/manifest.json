@@ -1,9 +1,9 @@
 {
-    "name": "UrlSlideshow",
+    "name": "Url Slideshow",
     "author": "proddi@splatterladder.com",
     "homepage_url": "https://github.com/proddi/urlslideshow",
 
-    "version": "0.4.0",
+    "version": "0.5.0",
     "manifest_version": 2,
 
     "icons": {
@@ -17,7 +17,7 @@
             "19": "icons/slideshow-24.png",
             "38": "icons/slideshow-48.png"
         },
-        "default_title": "Url Slideshow"
+        "default_title": "Start/Stop the show..."
     },
 
     "options_ui": {
@@ -31,6 +31,7 @@
     },
 
     "permissions": [
-      "tabs"
+        "contextMenus",
+        "tabs"
     ]
 }

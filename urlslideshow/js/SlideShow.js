@@ -2,12 +2,46 @@
  * The Slide show
  */
 function SlideShow(options) {
+    var noFunc = function() {};
     this.slides         = options.slides || [];
     this.defaultSleep   = options.defaultSleep || 60;
     this.autostart      = options.autostart;
     this.fullscreen     = options.fullscreen;
     this.onstart        = options.onstart;
     this.onstop         = options.onstop;
+    this.onSlideAdded   = options.onSlideAdded || noFunc;
+    this.onSlideRemoved = options.onSlideRemoved || noFunc;
+};
+
+
+SlideShow.prototype.setSlides = function setSlides(slides) {
+    var that = this;
+    this.slides.forEach(function(slide) { that.onSlideRemoved(slide, slide._meta); });
+    this.slides = slides;
+    this.slides.forEach(function(slide) { slide._meta = that.onSlideAdded(slide); });
+};
+
+SlideShow.prototype.getSlides = function getSlides() {
+    return this.slides.map(function(slide) { return { url: slide.url, sleep: slide.sleep, }; });
+};
+
+SlideShow.prototype.addSlide = function addSlide(slide) {
+    this.slides.push(slide);
+    slide._meta = this.onSlideAdded(slide);
+};
+
+SlideShow.prototype.findSlideByUrl = function findSlideByUrl(url) {
+    return this.slides.find(function(slide) { return slide.url == url; });
+};
+
+SlideShow.prototype.removeSlideByUrl = function removeSlideByUrl(url) {
+    var slide = this.findSlideByUrl(url),
+        i = this.slides.indexOf(slide);
+    if (i>=0) {
+        this.slides.splice(i, 1);
+        this.onSlideRemoved(slide, slide._meta);
+    }
+    return slide;
 };
 
 SlideShow.prototype.startStop = function startStop() {  // pause/unpause as well
@@ -58,6 +92,17 @@ SlideShow.prototype.nextSlidePlease = function nextSlidePlease(rotate) {
             if (chrome.runtime.lastError) {
                 console.error("Tab update failed: " + chrome.runtime.lastError.message);
                 that.stop();
+            } else {
+/*
+                // Inject script to monitor activity to start/stop slideshow
+                setTimeout(function() {
+                    chrome.tabs.executeScript(tab.id, {
+                            file: "js/content.js",
+                            allFrames: true,
+                            runAt: "document_idle",
+                        });
+                }, 1000);
+*/
             }
         });
     });
@@ -77,4 +122,9 @@ SlideShow.prototype.goto = function goto(index) {
         self.index = index-1;
         this.nextSlidePlease(true);
     }
+};
+
+SlideShow.prototype.gotoSlideByUrl = function gotoSlideByUrl(url) {
+    var slide = this.findSlideByUrl(url);
+    this.goto(this.slides.indexOf(slide));
 };

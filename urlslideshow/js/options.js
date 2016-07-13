@@ -27,7 +27,7 @@ window.onload = function() {
 
     // adds a url line
     document.getElementById("add").onclick = function() {
-        var clone = URLTemplate.clone({ url: "", sleep: 60, }).append();
+        var clone = URLTemplate.clone({ url: "", sleep: "", }).append();
         clone.find("input[type=button]").onclick = function() {  // TODO: generic click handlers?
             chrome.extension.sendMessage({
                 type: "goto",
@@ -45,6 +45,8 @@ window.onload = function() {
             defaultSleep: parseInt(document.getElementById("defaultTime").value),
             autostart: document.getElementById("autostart").checked,
             fullscreen: document.getElementById("fullscreen").checked,
+        }, function() {
+            window.close();
         });
     };
 

@@ -1,10 +1,10 @@
 {
-    "name": "Url Slideshow",
-    "author": "proddi@splatterladder.com",
-    "homepage_url": "https://github.com/proddi/urlslideshow",
+    "name": "Rotate Jenkins Views",
+    "author": "gvn03",
+    "homepage_url": "https://github.com/gvn03/rotate-jenkins-views",
 
-    "version": "0.5.0",
-    "manifest_version": 2,
+    "version": "0.1.0",
+    "manifest_version": 3,
 
     "icons": {
            "16": "icons/slideshow-24.png",
@@ -12,7 +12,7 @@
           "128": "icons/slideshow-128.png"
     },
 
-    "browser_action": {
+    "action": {
         "default_icon": {
             "19": "icons/slideshow-24.png",
             "38": "icons/slideshow-48.png"
@@ -21,17 +21,33 @@
     },
 
     "options_ui": {
-        "page": "html/options.html",
-        "chrome_style": true
+        "page": "html/options.html"
     },
 
+//    "content_scripts": [
+//        {
+//            "matches": [
+//                "http://*/*",
+//                "https://*/*"
+//            ],
+//            "js": [
+//                "js/SlideShow.js", "js/getFailures.js"
+//            ]
+//        }
+//    ],
     "background": {
-        "scripts": ["js/SlideShow.js", "js/background.js"],
-        "persistent": true
+        "service_worker": "background.js",
+        "type": "module"
     },
-
     "permissions": [
         "contextMenus",
-        "tabs"
+        "tabs",
+        "storage",
+        "scripting",
+        "notifications"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
     ]
 }

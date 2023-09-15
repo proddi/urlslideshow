@@ -23,6 +23,7 @@ var TemplateClone = function(template, scope) {
 
 TemplateClone.prototype.update = function update(scope) {
         scope = scope || this.scope;
+        console.log("scope is " + scope)
         this.node.innerHTML = this.template.html.replace(/\{\s*(\w+)\s*\}/g, function(all, key) {
         var value = scope[key];
         return (value === undefined) ? "{" + key + "}" : value;

@@ -81,12 +81,12 @@ SlideShow.prototype.stop = function stop() {
 };
 
 function registerFailures(result) {
-    result[0].result && chrome.notifications.create(Date.now()+"", {
-        title: 'Hey, theres a new Jenkins failure!',
-        message: result[0].result[0],
-        type: 'basic',
-        iconUrl: chrome.runtime.getURL('icons/slideshow-running-24.png')
-    });
+    // result[0].result && chrome.notifications.create(Date.now()+"", {
+    //     title: 'Hey, theres a new Jenkins failure!',
+    //     message: result[0].result[0],
+    //     type: 'basic',
+    //     iconUrl: chrome.runtime.getURL('icons/slideshow-running-24.png')
+    // });
 }
 
 SlideShow.prototype.nextSlidePlease = function nextSlidePlease(rotate) {

@@ -24,17 +24,6 @@
         "page": "html/options.html"
     },
 
-//    "content_scripts": [
-//        {
-//            "matches": [
-//                "http://*/*",
-//                "https://*/*"
-//            ],
-//            "js": [
-//                "js/SlideShow.js", "js/getFailures.js"
-//            ]
-//        }
-//    ],
     "background": {
         "service_worker": "background.js",
         "type": "module"
